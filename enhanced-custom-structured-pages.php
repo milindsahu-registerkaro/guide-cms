@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Guide CMS
  * Description: Stores rich page content in a custom table and exposes it through the WP REST API with extended functionality.
- * Version:     1.1.10
+ * Version:     1.1.11
  * Author:      RegisterKaro
  */
 
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 
 class Enhanced_CSP_Plugin {
 
-    const VERSION     = '1.1.10';
+    const VERSION     = '1.1.11';
     const TABLE       = 'enhanced_csp_pages';
     const NAMESPACE   = 'customcms/v1';
 
@@ -60,7 +60,7 @@ public function activate() {
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
     // Main pages table
-    $sql = "CREATE TABLE IF NOT EXISTS $table (
+    $sql = "CREATE TABLE $table (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         slug VARCHAR(191) NOT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'draft',
@@ -113,7 +113,7 @@ public function activate() {
     error_log('Main table creation/update result: ' . print_r($result1, true));
     
     // Category table
-    $category_sql = "CREATE TABLE IF NOT EXISTS $category_table (
+    $category_sql = "CREATE TABLE $category_table (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(191) NOT NULL,
         slug VARCHAR(191) NOT NULL,
@@ -238,7 +238,21 @@ public function update_database_schema() {
 
         // First, ensure all columns exist with correct types for main table
         foreach ($column_updates as $column => $definition) {
-            $wpdb->query("ALTER TABLE `{$table_name}` MODIFY COLUMN `{$column}` {$definition}");
+            // Get current column definition
+            $current_def = $wpdb->get_row("SHOW COLUMNS FROM `{$table_name}` WHERE Field = '{$column}'");
+            if ($current_def) {
+                // Compare definitions case-insensitively
+                $current_type = strtoupper($current_def->Type);
+                $new_type = strtoupper(preg_replace('/^(.*?)\s+/', '', $definition));
+                
+                // Only update if there's a real difference (not just case)
+                if ($current_type !== $new_type) {
+                    $wpdb->query("ALTER TABLE `{$table_name}` MODIFY COLUMN `{$column}` {$definition}");
+                }
+            } else {
+                // Column doesn't exist, add it
+                $wpdb->query("ALTER TABLE `{$table_name}` ADD COLUMN `{$column}` {$definition}");
+            }
         }
 
         // Then add indexes if they don't exist for main table
@@ -264,7 +278,21 @@ public function update_database_schema() {
 
         // Update category table columns
         foreach ($category_columns as $column => $definition) {
-            $wpdb->query("ALTER TABLE `{$category_table}` MODIFY COLUMN `{$column}` {$definition}");
+            // Get current column definition
+            $current_def = $wpdb->get_row("SHOW COLUMNS FROM `{$category_table}` WHERE Field = '{$column}'");
+            if ($current_def) {
+                // Compare definitions case-insensitively
+                $current_type = strtoupper($current_def->Type);
+                $new_type = strtoupper(preg_replace('/^(.*?)\s+/', '', $definition));
+                
+                // Only update if there's a real difference (not just case)
+                if ($current_type !== $new_type) {
+                    $wpdb->query("ALTER TABLE `{$category_table}` MODIFY COLUMN `{$column}` {$definition}");
+                }
+            } else {
+                // Column doesn't exist, add it
+                $wpdb->query("ALTER TABLE `{$category_table}` ADD COLUMN `{$column}` {$definition}");
+            }
         }
 
         // Add indexes for category table if they don't exist
