@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Guide CMS
  * Description: Stores rich page content in a custom table and exposes it through the WP REST API with extended functionality.
- * Version:     1.1.9
+ * Version:     1.1.10
  * Author:      RegisterKaro
  */
 
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 
 class Enhanced_CSP_Plugin {
 
-    const VERSION     = '1.1.9';
+    const VERSION     = '1.1.10';
     const TABLE       = 'enhanced_csp_pages';
     const NAMESPACE   = 'customcms/v1';
 
@@ -55,16 +55,12 @@ public function activate() {
     $category_table = $wpdb->prefix . self::TABLE . '_categories';
     
     // Log the actual table names being created for debugging
-    error_log('Creating tables: ' . $table . ' and ' . $category_table);
+    error_log('Creating/updating tables: ' . $table . ' and ' . $category_table);
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-    // Drop existing tables if they exist
-    $wpdb->query("DROP TABLE IF EXISTS $table");
-    $wpdb->query("DROP TABLE IF EXISTS $category_table");
-
     // Main pages table
-    $sql = "CREATE TABLE $table (
+    $sql = "CREATE TABLE IF NOT EXISTS $table (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         slug VARCHAR(191) NOT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'draft',
@@ -113,11 +109,11 @@ public function activate() {
     ) $charset_collate;";
 
     // Create main table
-    $result1 = $wpdb->query($sql);
-    error_log('Main table creation result: ' . ($result1 !== false ? 'Success' : 'Failed: ' . $wpdb->last_error));
+    $result1 = dbDelta($sql);
+    error_log('Main table creation/update result: ' . print_r($result1, true));
     
     // Category table
-    $category_sql = "CREATE TABLE $category_table (
+    $category_sql = "CREATE TABLE IF NOT EXISTS $category_table (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(191) NOT NULL,
         slug VARCHAR(191) NOT NULL,
@@ -131,8 +127,8 @@ public function activate() {
     ) $charset_collate;";
 
     // Create category table
-    $result2 = $wpdb->query($category_sql);
-    error_log('Category table creation result: ' . ($result2 !== false ? 'Success' : 'Failed: ' . $wpdb->last_error));
+    $result2 = dbDelta($category_sql);
+    error_log('Category table creation/update result: ' . print_r($result2, true));
     
     // Add rewrite rules
     $this->add_rewrite_rules();
