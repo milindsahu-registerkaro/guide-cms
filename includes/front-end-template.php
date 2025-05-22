@@ -94,6 +94,12 @@ function csp_render_page($page) {
             </div>
             <?php endif; ?>
             
+            <?php if (!empty($page['section_text'])) : ?>
+            <div class="csp-section-text">
+                <?php echo wp_kses_post($page['section_text']); ?>
+            </div>
+            <?php endif; ?>
+            
             <?php if (!empty($page['breadcrumbs'])) : ?>
             <nav class="csp-breadcrumbs" aria-label="Breadcrumb">
                 <ul>

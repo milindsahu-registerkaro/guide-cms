@@ -600,6 +600,26 @@
         $("#page-intro-text").val(page.intro_text || "");
       }
 
+      // If wp_editor exists for section text
+      if (typeof tinyMCE !== "undefined") {
+        var sectionEditor = tinyMCE.get("page-section-text");
+        if (sectionEditor) {
+          // Wait for editor to be fully initialized
+          if (sectionEditor.initialized) {
+            sectionEditor.setContent(page.section_text || "");
+          } else {
+            sectionEditor.on('init', function() {
+              sectionEditor.setContent(page.section_text || "");
+            });
+          }
+        } else {
+          // Try to find the textarea and set it directly
+          $("textarea[name='section_text']").val(page.section_text || "");
+        }
+      } else {
+        $("textarea[name='section_text']").val(page.section_text || "");
+      }
+
       // Hero banner text
       $("#page-hero-banner-text").val(page.hero_banner_text || "");
 
@@ -629,7 +649,7 @@
         if (conclusionEditor) {
           conclusionEditor.setContent(page.conclusion_content || "");
           console.log(
-            "Set conclusion content via tinyMCE.get():",
+            "Set conclusion_content from tinyMCE.get():",
             page.conclusion_content
           );
         } else if (tinyMCE.editors["conclusion-content"]) {
@@ -637,7 +657,7 @@
             page.conclusion_content || ""
           );
           console.log(
-            "Set conclusion content via tinyMCE.editors[]:",
+            "Set conclusion_content from tinyMCE.editors[]:",
             page.conclusion_content
           );
         } else {
@@ -646,7 +666,7 @@
             page.conclusion_content || ""
           );
           console.log(
-            "Set conclusion content via textarea:",
+            "Set conclusion_content from textarea:",
             page.conclusion_content
           );
         }
@@ -655,7 +675,7 @@
           page.conclusion_content || ""
         );
         console.log(
-          "Set conclusion content via textarea (no TinyMCE):",
+          "Set conclusion_content from textarea (no TinyMCE):",
           page.conclusion_content
         );
       }
@@ -1073,8 +1093,22 @@
           formData.intro_text = $("textarea[name='intro_text']").val();
           console.log("Got intro_text from textarea:", formData.intro_text);
         }
+
+        // Get section text
+        var sectionEditor = tinyMCE.get("page-section-text");
+        if (sectionEditor) {
+          formData.section_text = sectionEditor.getContent();
+          console.log(
+            "Got section_text from tinyMCE.get():",
+            formData.section_text
+          );
+        } else {
+          formData.section_text = $("textarea[name='section_text']").val();
+          console.log("Got section_text from textarea:", formData.section_text);
+        }
       } else {
         formData.intro_text = $("textarea[name='intro_text']").val();
+        formData.section_text = $("textarea[name='section_text']").val();
       }
 
       formData.hero_banner_text = $("#page-hero-banner-text").val();

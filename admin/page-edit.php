@@ -56,6 +56,18 @@ $page_title = $page_id ? 'Edit Page' : 'Add New Page';
                                         </td>
                                     </tr>
                                     <tr>
+                                        <th scope="row"><label for="page-section-text">Section Text</label></th>
+                                        <td>
+                                            <?php wp_editor('', 'page-section-text', [
+                                                'textarea_name' => 'section_text',
+                                                'media_buttons' => true,
+                                                'textarea_rows' => 5,
+                                                'teeny' => false
+                                            ]); ?>
+                                            <p class="description">Text that appears in the section area</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row"><label for="page-hero-banner-text">Hero Banner Text</label></th>
                                         <td>
                                             <textarea id="page-hero-banner-text" name="hero_banner_text" rows="4" class="large-text"></textarea>

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Guide CMS
  * Description: Stores rich page content in a custom table and exposes it through the WP REST API with extended functionality.
- * Version:     1.1.8
+ * Version:     1.1.9
  * Author:      RegisterKaro
  */
 
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 
 class Enhanced_CSP_Plugin {
 
-    const VERSION     = '1.1.8';
+    const VERSION     = '1.1.9';
     const TABLE       = 'enhanced_csp_pages';
     const NAMESPACE   = 'customcms/v1';
 
@@ -80,6 +80,7 @@ public function activate() {
         hero_banner_text TEXT DEFAULT NULL,
         hero_image VARCHAR(255) DEFAULT NULL,
         intro_text MEDIUMTEXT DEFAULT NULL,
+        section_text MEDIUMTEXT DEFAULT NULL,
         sections LONGTEXT DEFAULT NULL,
         conclusion_heading VARCHAR(255) DEFAULT NULL,
         conclusion_content MEDIUMTEXT DEFAULT NULL,
@@ -205,6 +206,7 @@ public function update_database_schema() {
             'hero_banner_text' => 'TEXT DEFAULT NULL',
             'hero_image' => 'VARCHAR(255) DEFAULT NULL',
             'intro_text' => 'MEDIUMTEXT DEFAULT NULL',
+            'section_text' => 'MEDIUMTEXT DEFAULT NULL',
             'sections' => 'LONGTEXT DEFAULT NULL',
             'conclusion_heading' => 'VARCHAR(255) DEFAULT NULL',
             'conclusion_content' => 'MEDIUMTEXT DEFAULT NULL',
@@ -588,6 +590,7 @@ public function get_endpoint_args_for_item_schema() {
         'hero_banner_text' => ['type' => 'string', 'required' => false],
         'hero_image' => ['type' => 'string', 'required' => false],
         'intro_text' => ['type' => 'string', 'required' => false],
+        'section_text' => ['type' => 'string', 'required' => false],
         
         // Structured Content
         'sections' => ['type' => 'array', 'required' => false, 'sanitize_callback' => null],
@@ -701,6 +704,7 @@ public function save_page(WP_REST_Request $req) {
         'hero_banner_text' => isset($params['hero_banner_text']) ? wp_kses_post($params['hero_banner_text']) : null,
         'hero_image' => isset($params['hero_image']) ? esc_url_raw($params['hero_image']) : null,
         'intro_text' => isset($params['intro_text']) ? wp_kses_post($params['intro_text']) : null,
+        'section_text' => isset($params['section_text']) ? wp_kses_post($params['section_text']) : null,
         
         // Structured Content
         'sections' => isset($params['sections']) ? wp_json_encode($params['sections'], JSON_UNESCAPED_UNICODE) : null,
